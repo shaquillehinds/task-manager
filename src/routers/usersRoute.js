@@ -4,12 +4,14 @@ const auth = require("../middleware/auth");
 const jwt = require("jsonwebtoken");
 const multer = require("multer");
 const sharp = require("sharp");
+const { sendWelcomeEmail, sendCancelEmail } = require("../emails/account");
 
 router.post("/", async (req, res) => {
   try {
     const user = new User(req.body);
     const token = await user.generateAuthToken();
     await user.save();
+    sendWelcomeEmail(user.email, user.name);
     res.status(201).send({ user, token });
   } catch (e) {
     res.status(400).send(e);
@@ -39,6 +41,7 @@ router
   .delete(auth, async (req, res) => {
     try {
       await req.user.remove();
+      sendCancelEmail(req.user.email, req.user.name);
       res.send(req.user);
     } catch (e) {
       res.status(500).send(e);
@@ -62,10 +65,7 @@ router
     auth,
     upload.single("avatar"),
     async (req, res) => {
-      const buffer = await sharp(req.file.buffer)
-        .resize({ width: 250, height: 250 })
-        .png()
-        .toBuffer();
+      const buffer = await sharp(req.file.buffer).resize({ width: 250, height: 250 }).png().toBuffer();
       req.user.avatar = buffer;
       await req.user.save();
       res.send();
@@ -116,9 +116,7 @@ router.post("/login", async (req, res) => {
 
 router.post("/logout", auth, async (req, res) => {
   try {
-    req.user.tokens = req.user.tokens.filter(
-      (token) => token.token !== req.token
-    );
+    req.user.tokens = req.user.tokens.filter((token) => token.token !== req.token);
     user = await req.user.save();
     res.send(user);
   } catch (e) {
