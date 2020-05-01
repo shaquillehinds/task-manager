@@ -96,11 +96,12 @@ router.get("/:id/avatar", async (req, res) => {
 router.post("/login", async (req, res) => {
   if (req.header("authorization")) {
     var token = req.header("authorization").replace("Bearer ", "");
-    var decoded = await jwt.verify(token, "theelectricuniverse");
+    var decoded = await jwt.verify(token, process.env.JWT_SECRET);
   }
 
   try {
     const user = await User.findByCredentials(req.body);
+
     if (decoded) {
       const isLoggedIn = user.tokens.every((t) => t.token !== token);
       if (!isLoggedIn) {
@@ -110,7 +111,7 @@ router.post("/login", async (req, res) => {
     const newToken = await user.generateAuthToken();
     res.send({ user, newToken });
   } catch (e) {
-    res.status(400).send("There was an error");
+    res.status(400).send(e);
   }
 });
 

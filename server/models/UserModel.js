@@ -70,11 +70,11 @@ userSchema.statics.findByCredentials = async ({ email, password }) => {
   try {
     const user = await User.findOne({ email });
     if (!user) {
-      throw new Error("Unable to login");
+      throw new Error("Unable to login with email");
     }
     const verified = await bcrypt.compare(password, user.password);
     if (!verified) {
-      throw new Error("Unable to login");
+      throw new Error("Unable to login with password");
     }
 
     return user;
@@ -99,7 +99,7 @@ userSchema.methods.toJSON = function () {
 
 //hash password before saving
 userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) {
+  if (this.isModified("password")) {
     this.password = await bcrypt.hash(this.password, 8);
   }
 

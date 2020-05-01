@@ -7,7 +7,11 @@
     "start": "node server/index.js",
     "nodemon": "nodemon server/",
     "build": "webpack",
-    "dev": "webpack-dev-server"
+    "dev": "webpack-dev-server",
+    "test": "jest"
+  },
+  "jest": {
+    "testEnvironment": "node"
   },
   "keywords": [],
   "author": "",
@@ -42,6 +46,9 @@
     "webpack-dev-server": "^3.10.3"
   },
   "devDependencies": {
-    "nodemon": "^2.0.3"
+    "@babel/plugin-transform-runtime": "^7.9.6",
+    "jest": "^25.5.3",
+    "nodemon": "^2.0.3",
+    "supertest": "^4.0.2"
   }
 }
