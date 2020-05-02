@@ -13,5 +13,6 @@ module.exports = {
   plugins: [new Dotenv()],
   devServer: {
     contentBase: path.join(__dirname, "public"),
+    port: 5000,
   },
 };

@@ -14,9 +14,7 @@ router
       sort = {};
       sort[key] = value;
     };
-    typeof sort === "string"
-      ? objectify(sort.split(":"))
-      : (sort.completed = 1);
+    typeof sort === "string" ? objectify(sort.split(":")) : (sort.completed = 1);
     const match = {};
     if (completed) {
       match.completed = completed === "true";
