@@ -5,27 +5,38 @@ import CenterModalContainer from "./CenterModalContainer";
 
 const Home = () => {
   const [userData, setUserData] = useContext(Context);
-  const [state, setState] = useState({ current: "welcome" });
+  let current;
+  userData.user.name ? (current = "loggedIn") : (current = "welcome");
+  const [state, setState] = useState({ current });
   useEffect(() => {
-    if (localStorage.getItem("JWT")) {
+    if (localStorage.getItem("JWT") && !userData.user.name) {
       const JWT = localStorage.getItem("JWT");
-      axios({
-        method: "get",
-        url: `${process.env.URL}/users/me`,
-        headers: { Authorization: `Bearer ${JWT}` },
-      })
-        .then((res) => {
-          setUserData((prev) => {
-            return [res.data, []];
+      const getUserData = async () => {
+        try {
+          const res = await axios({
+            method: "get",
+            url: `${process.env.URL}/users/me`,
+            headers: { Authorization: `Bearer ${JWT}` },
           });
+          const { data } = await axios({
+            method: "get",
+            url: `${process.env.URL}/tasks`,
+            headers: { Authorization: `Bearer ${JWT}` },
+          });
+          const { tasks, count, completed, notCompleted } = data;
+          const user = res.data;
+          setUserData((prev) => ({ user, tasks, count, completed, notCompleted }));
           setState(() => ({ current: "loggedIn" }));
-        })
-        .catch((e) => console.log(e));
+        } catch (e) {
+          console.log(e);
+        }
+      };
+      getUserData();
     }
   }, []);
   useEffect(() => {
-    !userData[0].name ? setState({ current: "welcome" }) : true;
-  }, [userData[0]]);
+    !userData.user.name ? setState({ current: "welcome" }) : true;
+  }, [userData.tasks]);
   const modalActionHandler = (e) => {
     e.preventDefault();
     const action = e.target.value || e.target.lastElementChild.value;
@@ -40,16 +51,16 @@ const Home = () => {
         const name = document.getElementById("signUpName").value;
         const newUser = async () => {
           try {
-            const data = await axios.post(`${process.env.URL}/users`, { name, email, password });
+            const { data } = await axios.post(`${process.env.URL}/users`, { name, email, password });
             const tasks = await axios({
               method: "get",
               url: `${process.env.URL}/tasks`,
-              headers: { Authorization: `Bearer ${data.data.token}` },
+              headers: { Authorization: `Bearer ${data.token}` },
             });
-            setUserData(() => {
-              return [data.data.user, tasks.data];
+            setUserData((...prev) => {
+              return { ...prev, user: data.user, tasks: tasks.data };
             });
-            localStorage.setItem("JWT", data.data.token);
+            localStorage.setItem("JWT", data.token);
             setState({ current: "loggedIn" });
           } catch (e) {
             console.log(e);
@@ -63,15 +74,22 @@ const Home = () => {
           const password = document.getElementById("loginPassword").value;
           try {
             const userData = await axios.post(`${process.env.URL}/users/login`, { email, password });
-            const tasks = await axios({
+            const { data } = await axios({
               method: "get",
               url: `${process.env.URL}/tasks`,
               headers: { Authorization: `Bearer ${userData.data.newToken}` },
             });
-            setUserData(() => [userData.data.user, tasks.data]);
+            const { tasks, count, completed, notCompleted } = data;
+            setUserData((prev) => ({
+              ...prev,
+              user: userData.data.user,
+              tasks,
+              count,
+              completed,
+              notCompleted,
+            }));
             setState(() => ({ current: "loggedIn" }));
             localStorage.setItem("JWT", userData.data.newToken);
-            console.log(tasks.data);
           } catch (e) {
             console.log(e);
           }
@@ -82,15 +100,16 @@ const Home = () => {
         const task = document.getElementById("homeTask");
         const addNewTask = async () => {
           try {
-            const savedTask = await axios({
+            const { data } = await axios({
               method: "post",
               data: { description: task.value },
               url: `${process.env.URL}/tasks`,
               headers: { Authorization: `Bearer ${localStorage.getItem("JWT")}` },
             });
             setUserData((prev) => {
-              const newState = [...prev];
-              newState[1].push(savedTask.data);
+              const newState = { ...prev };
+              newState.tasks.push(data);
+              newState.count += 1;
               return newState;
             });
           } catch (e) {

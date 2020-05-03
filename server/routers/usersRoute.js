@@ -4,6 +4,7 @@ const auth = require("../middleware/auth");
 const jwt = require("jsonwebtoken");
 const multer = require("multer");
 const sharp = require("sharp");
+const path = require("path");
 const { sendWelcomeEmail, sendCancelEmail } = require("../emails/account");
 
 router.post("/", async (req, res) => {
@@ -11,7 +12,7 @@ router.post("/", async (req, res) => {
     const user = new User(req.body);
     const token = await user.generateAuthToken();
     await user.save();
-    sendWelcomeEmail(user.email, user.name);
+    // sendWelcomeEmail(user.email, user.name);
     res.status(201).send({ user, token });
   } catch (e) {
     res.status(400).send(e);
@@ -24,14 +25,14 @@ router
     res.send(req.user);
   })
   .patch(auth, async (req, res) => {
-    const updates = Object.keys(req.body);
+    const updates = Object.keys(req.body.update);
     const allowedUpdates = ["name", "email", "password", "age"];
     const valid = updates.every((update) => allowedUpdates.includes(update));
     if (!valid) {
       return res.status(400).send("Invalid update request");
     }
     try {
-      updates.forEach((update) => (req.user[update] = req.body[update]));
+      updates.forEach((update) => (req.user[update] = req.body.update[update]));
       await req.user.save();
       res.status(202).send(req.user);
     } catch (e) {
@@ -41,7 +42,7 @@ router
   .delete(auth, async (req, res) => {
     try {
       await req.user.remove();
-      sendCancelEmail(req.user.email, req.user.name);
+      // sendCancelEmail(req.user.email, req.user.name);
       res.send(req.user);
     } catch (e) {
       res.status(500).send(e);
@@ -84,7 +85,10 @@ router.get("/:id/avatar", async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user || !user.avatar) {
-      throw new Error();
+      res.set("Content-Type", "image/png");
+      return res.sendFile(`avatar.png`, { root: path.join(__dirname, "../images") }, (err) => {
+        err && console.log(err);
+      });
     }
     res.set("Content-Type", "image/png");
     res.send(user.avatar);

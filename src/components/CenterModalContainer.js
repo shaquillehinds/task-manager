@@ -22,7 +22,7 @@ const CenterModalContainer = (props) => {
   };
   useEffect(() => {
     setFormState((prev) => ({ ...prev, task: "" }));
-  }, [userData]);
+  }, [userData.tasks.length]);
   return (
     <div>
       {props.name === "welcome" && (

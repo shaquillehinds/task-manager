@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 import { Context } from "./Context";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import axios from "axios";
 
 const Header = () => {
@@ -15,16 +15,26 @@ const Header = () => {
       console.log(loggedOut.data);
     } catch (e) {}
     localStorage.removeItem("JWT");
-    setUserData(() => [{}, []]);
+    setUserData(() => ({ user: {}, tasks: [], count: 0, completed: 0, notCompleted: 0 }));
   };
   return (
     <header>
-      <h1>Task Manager</h1>
-      {userData[0].name && (
+      <h1>
+        <Link to="/">Task Manager</Link>
+      </h1>
+      {userData.user.name && (
         <nav>
           <ul>
-            <li>Profile</li>
-            <li>Tasks</li>
+            <li>
+              <NavLink to="/profile" activeClassName="is-active">
+                Profile
+              </NavLink>
+            </li>
+            <li>
+              <NavLink to="/tasks" activeClassName="is-active">
+                Tasks
+              </NavLink>
+            </li>
             <li>
               <Link onClick={logOutUser} to="/">
                 Logout

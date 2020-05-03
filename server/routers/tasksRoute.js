@@ -27,7 +27,11 @@ router
           options: { limit, skip, sort },
         })
         .execPopulate();
-      res.send(req.user.tasks);
+      const count = await Task.countDocuments({ owner: req.user._id });
+      const completed = await Task.countDocuments({ owner: req.user_id, completed: true });
+      const notCompleted = count - completed;
+      const tasks = req.user.tasks;
+      res.send({ tasks, count, completed, notCompleted });
     } catch (e) {
       res.status(500).send(e);
     }
@@ -61,7 +65,7 @@ router
     }
   })
   .patch(auth, async (req, res) => {
-    const updates = Object.keys(req.body);
+    const updates = Object.keys(req.body.update);
     const allowedUpdates = ["completed", "description"];
     const valid = updates.every((update) => allowedUpdates.includes(update));
     if (!valid) {
