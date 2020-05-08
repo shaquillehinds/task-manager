@@ -8,7 +8,7 @@
     "nodemon": "nodemon server/",
     "build": "webpack",
     "dev": "webpack-dev-server",
-    "test": "jest"
+    "test": "jest --runInBand"
   },
   "jest": {
     "testEnvironment": "node"

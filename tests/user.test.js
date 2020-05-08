@@ -1,27 +1,11 @@
 const request = require("supertest");
 const app = require("../server/app");
-const jwt = require("jsonwebtoken");
-const mongoose = require("mongoose");
 const User = require("../server/models/UserModel");
-
-/*********************************TEAR DOWN *******************/
-
-const userOneId = new mongoose.Types.ObjectId();
-const userOne = {
-  _id: userOneId,
-  name: "Dina",
-  email: "dina@example.com",
-  password: "dinaking",
-  tokens: [{ token: jwt.sign({ _id: userOneId }, process.env.JWT_SECRET) }],
-};
-
-beforeEach(async () => {
-  await User.deleteMany();
-  const user = await new User(userOne);
-  user.save();
-});
+const { userOneId, userOne, setupDatabase } = require("./fixtures/db");
 
 /************************************TESTS ********************/
+
+beforeEach(setupDatabase);
 
 test("Should signup a new user", async () => {
   const response = await request(app)
@@ -95,4 +79,36 @@ test("Should delete account for user", async () => {
 });
 test("Should not delete for unauth user", async () => {
   await request(app).delete("/users/me").send().expect(401);
+});
+
+test("Should upload avatar image", async () => {
+  await request(app)
+    .post("/users/me/avatar")
+    .set("Authorization", `Bearer ${userOne.tokens[0].token}`)
+    .attach("avatar", "tests/fixtures/profile-pic.jpg")
+    .expect(200);
+
+  const user = await User.findById(userOneId);
+
+  expect(user.avatar).toEqual(expect.any(Buffer));
+});
+
+test("Should update valid user fields", async () => {
+  await request(app)
+    .patch("/users/me")
+    .set("Authorization", `Bearer ${userOne.tokens[0].token}`)
+    .send({ update: { name: "Deborah", email: "deborah@example.com" } })
+    .expect(202);
+
+  const user = await User.findById(userOneId);
+
+  expect(user.email).toEqual("deborah@example.com");
+});
+
+test("should not update invalid user fields", async () => {
+  await request(app)
+    .patch("/users/me")
+    .set("Authorization", `Bearer ${userOne.tokens[0].token}`)
+    .send({ update: { location: "Bahamas" } })
+    .expect(400);
 });

@@ -28,7 +28,7 @@ router
         })
         .execPopulate();
       const count = await Task.countDocuments({ owner: req.user._id });
-      const completed = await Task.countDocuments({ owner: req.user_id, completed: true });
+      const completed = await Task.countDocuments({ owner: req.user._id, completed: true });
       const notCompleted = count - completed;
       const tasks = req.user.tasks;
       res.send({ tasks, count, completed, notCompleted });
@@ -80,7 +80,7 @@ router
       if (!task) {
         return res.status(404).send("Task Not Found");
       }
-      updates.forEach((update) => (task[update] = req.body[update]));
+      updates.forEach((update) => (task[update] = req.body.update[update]));
       await task.save();
       res.status(202).send(task);
     } catch (e) {
