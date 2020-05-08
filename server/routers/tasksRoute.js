@@ -14,9 +14,7 @@ router
       sort = {};
       sort[key] = value;
     };
-    typeof sort === "string"
-      ? objectify(sort.split(":"))
-      : (sort.completed = 1);
+    typeof sort === "string" ? objectify(sort.split(":")) : (sort.completed = 1);
     const match = {};
     if (completed) {
       match.completed = completed === "true";
@@ -30,14 +28,7 @@ router
         })
         .execPopulate();
       const count = await Task.countDocuments({ owner: req.user._id });
-<<<<<<< HEAD
       const completed = await Task.countDocuments({ owner: req.user._id, completed: true });
-=======
-      const completed = await Task.countDocuments({
-        owner: req.user_id,
-        completed: true,
-      });
->>>>>>> 224805ba42b0f4b0ac39104ba39ca14a86816247
       const notCompleted = count - completed;
       const tasks = req.user.tasks;
       res.send({ tasks, count, completed, notCompleted });
