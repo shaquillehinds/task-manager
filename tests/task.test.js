@@ -25,6 +25,21 @@ test("Shoud create task for user", async () => {
   expect(task.completed).toBe(false);
 });
 
+test("Shoud create task for user and upload image", async () => {
+  const res = await request(app)
+    .post("/tasks")
+    .set("Authorization", `Bearer ${userOne.tokens[0].token}`)
+    .field("description", "task test")
+    .attach("image", "tests/fixtures/profile-pic.jpg")
+    .expect(201);
+
+  const task = await Task.findById(res.body._id);
+  expect(task).not.toBeNull();
+  expect(task.description).toBe("task test");
+  expect(task.image).toEqual(expect.any(Buffer));
+  expect(task.completed).toBe(false);
+});
+
 test("Should get all tasks of userOne", async () => {
   const res = await request(app)
     .get("/tasks")

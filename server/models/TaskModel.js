@@ -11,6 +11,10 @@ const taskSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    image: {
+      type: Buffer,
+      default: undefined,
+    },
     owner: {
       type: mongoose.Schema.Types.ObjectID,
       required: true,

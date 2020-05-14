@@ -1,6 +1,20 @@
 const router = require("express").Router();
 const Task = require("../models/TaskModel");
 const auth = require("../middleware/auth");
+const sharp = require("sharp");
+
+const multer = require("multer");
+const upload = multer({
+  limits: {
+    fileSize: 1000000,
+  },
+  fileFilter(req, file, cb) {
+    if (!file.originalname.match(/\.(png|jpe?g)$/)) {
+      cb(new Error("Please upload a file that is png, jpg or jpeg"));
+    }
+    cb(undefined, true);
+  },
+});
 
 router
   .route("/")
@@ -36,11 +50,21 @@ router
       res.status(500).send(e);
     }
   })
-  .post(auth, async (req, res) => {
-    const task = new Task({
-      ...req.body,
-      owner: req.user._id,
-    });
+  .post(auth, upload.single("image"), async (req, res) => {
+    let task;
+    if (req.file) {
+      const buffer = await sharp(req.file.buffer).resize(100, 100).png().toBuffer();
+      task = new Task({
+        ...req.body,
+        image: buffer,
+        owner: req.user._id,
+      });
+    } else {
+      task = new Task({
+        ...req.body,
+        owner: req.user._id,
+      });
+    }
     try {
       // task = await Task.create(req.body);
       await task.save();
