@@ -3,6 +3,8 @@ import axios from "axios";
 import { Context } from "./Context";
 import CenterModalContainer from "./CenterModalContainer";
 
+const domElement = document.getElementById.bind(document);
+
 const Home = () => {
   const [userData, setUserData] = useContext(Context);
   let current;
@@ -46,9 +48,9 @@ const Home = () => {
       case "welcomeSignUp":
         return setState({ current: "signUp" });
       case "signUp":
-        const email = document.getElementById("signUpEmail").value;
-        const password = document.getElementById("signUpPassword").value;
-        const name = document.getElementById("signUpName").value;
+        const email = domElement("signUpEmail").value;
+        const password = domElement("signUpPassword").value;
+        const name = domElement("signUpName").value;
         const newUser = async () => {
           try {
             const { data } = await axios.post(`${process.env.URL}/users`, { name, email, password });
@@ -70,8 +72,8 @@ const Home = () => {
         return true;
       case "login":
         const loginUser = async () => {
-          const email = document.getElementById("loginEmail").value;
-          const password = document.getElementById("loginPassword").value;
+          const email = domElement("loginEmail").value;
+          const password = domElement("loginPassword").value;
           try {
             const userData = await axios.post(`${process.env.URL}/users/login`, { email, password });
             const { data } = await axios({
@@ -91,13 +93,15 @@ const Home = () => {
             setState(() => ({ current: "loggedIn" }));
             localStorage.setItem("JWT", userData.data.newToken);
           } catch (e) {
+            const loginError = domElement("login-error");
+            loginError.innerText = "Incorrect email or password.";
             console.log(e);
           }
         };
         loginUser();
         return true;
       case "create":
-        const task = document.getElementById("homeTask");
+        const task = domElement("homeTask");
         const addNewTask = async () => {
           try {
             const { data } = await axios({

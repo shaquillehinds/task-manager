@@ -53,6 +53,9 @@ const CenterModalContainer = (props) => {
             />
             <button value="signUp">Sign Up</button>
           </form>
+          <button onClick={props.handler} value="welcome">
+            Cancel
+          </button>
         </div>
       )}
       {props.name === "login" && (
@@ -69,6 +72,10 @@ const CenterModalContainer = (props) => {
             />
             <button value="login">Login</button>
           </form>
+          <button onClick={props.handler} value="welcome">
+            Cancel
+          </button>
+          <p id="login-error"></p>
         </div>
       )}
       {props.name === "loggedIn" && (

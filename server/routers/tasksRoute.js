@@ -23,12 +23,18 @@ router
     limit = parseInt(limit);
     skip = parseInt(skip);
     const objectify = (input) => {
-      const key = input[0];
-      const value = input[1] === "asc" ? 1 : -1;
       sort = {};
-      sort[key] = value;
+      if (input === "Name Desc") {
+        sort.description = -1;
+      } else if (input === "Name Asc") {
+        sort.description = 1;
+      } else if (input === "Date Latest") {
+        sort.createdAt = -1;
+      } else {
+        sort.createdAt = 1;
+      }
     };
-    typeof sort === "string" ? objectify(sort.split(":")) : (sort.completed = 1);
+    typeof sort === "string" ? objectify(sort) : (sort["createdAt"] = -1);
     const match = {};
     if (completed) {
       match.completed = completed === "true";

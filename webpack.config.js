@@ -11,6 +11,7 @@ module.exports = {
     rules: [{ test: /\.js$/, use: "babel-loader" }],
   },
   plugins: [new Dotenv()],
+  devtool: "eval-cheap-module-source-map",
   devServer: {
     contentBase: path.join(__dirname, "public"),
     port: 5000,
