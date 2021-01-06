@@ -23,7 +23,7 @@
     "@babel/preset-env": "^7.9.6",
     "@babel/preset-react": "^7.9.4",
     "@sendgrid/mail": "^7.1.0",
-    "axios": "^0.19.2",
+    "axios": "^0.21.1",
     "babel": "^6.23.0",
     "babel-loader": "^8.1.0",
     "bcryptjs": "^2.4.3",
